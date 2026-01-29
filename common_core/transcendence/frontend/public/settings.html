@@ -1,0 +1,154 @@
+<!-- Section Paramètres -->
+<div class="max-w-4xl mx-auto space-y-8">
+  <div class="text-center">
+    <h2 class="text-4xl font-bold mb-4">⚙️ Settings</h2>
+    <p class="text-gray-400">Customize your gaming experience</p>
+  </div>
+
+  <div class="bg-gray-800 rounded-lg p-6">
+    <h3 class="text-xl font-bold mb-4 text-yellow-400">🎯 Presets</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <button onclick="loadPreset('casual')" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-medium transition-colors">
+        😌 Casual
+      </button>
+      <button onclick="loadPreset('balanced')" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium transition-colors">
+        ⚖️ Balanced
+      </button>
+      <button onclick="loadPreset('competitive')" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded text-sm font-medium transition-colors">
+        🔥 Competitive
+      </button>
+      <button onclick="loadPreset('chaos')" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-medium transition-colors">
+        🌪️ Chaos
+      </button>
+    </div>
+  </div>
+
+  <div class="bg-gray-800 rounded-lg p-6">
+    <h3 class="text-xl font-bold mb-4 text-cyan-400">👁️ Real-Time Preview</h3>
+    <div class="bg-gray-900 rounded-lg p-4 mb-4">
+      <div id="game-preview" class="relative bg-green-800 border-2 border-white rounded mx-auto" style="width: 600px; height: 300px; overflow: hidden;">
+        <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-white transform -translate-x-1/2 opacity-50"></div>
+        
+        <div id="preview-player1" class="absolute bg-blue-400 rounded" style="left: 10px; top: 50%; transform: translateY(-50%); width: 8px; height: 60px;"></div>
+        
+        <div id="preview-player2" class="absolute bg-red-400 rounded" style="right: 10px; top: 50%; transform: translateY(-50%); width: 8px; height: 60px;"></div>
+        
+        <div id="preview-ball" class="absolute bg-white rounded-full" style="left: 300px; top: 150px; width: 12px; height: 12px; transform: translate(-50%, -50%);"></div>
+      </div>
+      
+      <div id="settings-stats" class="mt-4 p-3 bg-gray-700 rounded-lg">
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-gray-800 rounded-lg p-6">
+      <h3 class="text-lg font-bold mb-4 text-yellow-400">⚽ Ball Settings</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Speed: <span id="ball-speed-value" class="text-yellow-400">0.3</span></label>
+          <input type="range" id="ball-speed" min="0.1" max="2.0" step="0.1" value="0.3" class="w-full">
+          <div class="flex justify-between text-xs text-gray-400 mt-1">
+            <span>Slow (0.1)</span>
+            <span>Fast (2.0)</span>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Size: <span id="ball-size-value" class="text-yellow-400">2.0</span></label>
+          <input type="range" id="ball-size" min="0.5" max="4.0" step="0.1" value="2.0" class="w-full">
+          <div class="flex justify-between text-xs text-gray-400 mt-1">
+            <span>Small (0.5)</span>
+            <span>Large (4.0)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-800 rounded-lg p-6">
+      <h3 class="text-lg font-bold mb-4 text-blue-400">🎮 Player Settings</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Speed: <span id="player-speed-value" class="text-blue-400">1.0</span></label>
+          <input type="range" id="player-speed" min="0.5" max="3.0" step="0.1" value="1.0" class="w-full">
+          <div class="flex justify-between text-xs text-gray-400 mt-1">
+            <span>Slow (0.5)</span>
+            <span>Fast (3.0)</span>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Size: <span id="player-size-value" class="text-blue-400">30</span></label>
+          <input type="range" id="player-size" min="15" max="50" step="1" value="30" class="w-full">
+          <div class="flex justify-between text-xs text-gray-400 mt-1">
+            <span>Small (15)</span>
+            <span>Large (50)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-800 rounded-lg p-6">
+      <h3 class="text-lg font-bold mb-4 text-green-400">🏆 Game Settings</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Winning Score: <span id="win-score-value" class="text-green-400">7</span></label>
+          <input type="range" id="win-score" min="1" max="21" step="1" value="7" class="w-full">
+          <div class="flex justify-between text-xs text-gray-400 mt-1">
+            <span>Fast (1)</span>
+            <span>Long (21)</span>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">AI Difficulty:</label>
+          <select id="ai-difficulty" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+            <option value="easy">😌 Easy</option>
+            <option value="medium" selected>🎯 Medium</option>
+            <option value="hard">🔥 Hard</option>
+            <option value="expert">👹 Impossible</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-800 rounded-lg p-6">
+      <h3 class="text-lg font-bold mb-4 text-purple-400">💾 Actions</h3>
+      <div class="space-y-3">
+        <button onclick="saveSettings()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-medium transition-colors">
+          💾 Save
+        </button>
+        <button onclick="resetToDefault()" class="w-full bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded font-medium transition-colors">
+          🔄 Reset
+        </button>
+        <button onclick="saveAndPlay()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-medium transition-colors">
+          🚀 Apply & Play
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-gray-800 rounded-lg p-6">
+    <h3 class="text-xl font-bold mb-4 text-purple-400">🎮 Choose Game Mode</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <button onclick="startPvPGame()" class="bg-blue-600 hover:bg-blue-700 p-4 rounded-lg text-center transition-colors">
+        <div class="text-2xl mb-2">👥</div>
+        <div class="font-medium">Player vs Player</div>
+        <div class="text-sm text-gray-300">Classic 2-player mode</div>
+      </button>
+      <button onclick="startAIGame()" class="bg-red-600 hover:bg-red-700 p-4 rounded-lg text-center transition-colors">
+        <div class="text-2xl mb-2">🤖</div>
+        <div class="font-medium">Player vs AI</div>
+        <div class="text-sm text-gray-300">Challenge the AI</div>
+      </button>
+      <button onclick="startTournament()" class="bg-purple-600 hover:bg-purple-700 p-4 rounded-lg text-center transition-colors">
+        <div class="text-2xl mb-2">🏆</div>
+        <div class="font-medium">Tournament</div>
+        <div class="text-sm text-gray-300">Organized competition</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <button onclick="showSection('home')" class="bg-gray-700 hover:bg-gray-600 px-8 py-3 rounded-lg font-medium transition-colors absolute right-6 -bottom-80">
+      ← Back to Main Menu
+    </button>
+  </div>
+</div>

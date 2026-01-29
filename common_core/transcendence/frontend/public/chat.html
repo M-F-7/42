@@ -1,0 +1,80 @@
+<!-- Section Chat -->
+<div class="max-w-6xl mx-auto">
+  <div class="bg-gray-800 rounded-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-2xl font-bold text-purple-400">💬 Chat</h3>
+      <button onclick="showSection('home')" class="bg-gray-700 hover:bg-gray-600 px-8 py-3 rounded-lg font-medium transition-colors absolute right-6 bottom-6">
+      ← Back to Main Menu
+    </button>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-96">
+      <div class="lg:col-span-3 flex flex-col">
+        <div id="chat-messages" class="flex-1 bg-gray-900 rounded-lg p-4 overflow-y-auto mb-4 space-y-3">
+          <div class="text-gray-400 text-center text-sm">
+            💬 Welcome to the chat! Please be respectful and have fun!
+          </div>
+        </div>
+        
+        <div class="flex">
+          <input type="text" id="chat-input" placeholder="Type your message... (Press Enter to send)"
+                 class="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-l-lg focus:outline-none focus:border-purple-500 text-white">
+          <button onclick="sendMessage()" class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-r-lg transition-colors">
+            📤 Send
+          </button>
+        </div>
+        
+        <div class="flex flex-wrap gap-2 mt-3">
+          <button onclick="sendQuickMessage('gg')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm transition-colors">
+            👏 GG
+          </button>
+          <button onclick="sendQuickMessage('glhf')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm transition-colors">
+            🎮 GL HF
+          </button>
+          <button onclick="sendQuickMessage('looking-for-game')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm transition-colors">
+            🔍 Looking for a game
+          </button>
+          <button onclick="sendQuickMessage('tournament')" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm transition-colors">
+            🏆 Tournament?
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-gray-700 rounded-lg p-4">
+          <h4 class="font-semibold text-green-400 mb-3 flex items-center">
+            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+            Online (<span id="online-count"></span>)
+          </h4>
+          <div id="online-users" class="space-y-2 text-sm max-h-48 overflow-y-auto">
+          </div>
+        </div>
+
+        <div class="bg-gray-700 rounded-lg p-4">
+          <h4 class="font-semibold text-blue-400 mb-3">⚔️ Next Matches</h4>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span>"NextOpponent()"</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-700 rounded-lg p-4">
+          <h4 class="font-semibold text-orange-400 mb-3">⚡ Actions</h4>
+          <div class="space-y-2">
+            <button onclick="startPvPGame()" class="w-full bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-sm transition-colors">
+              🎮 Quick Match
+            </button>
+            <button onclick="showTournament()" class="w-full bg-yellow-600 hover:bg-yellow-700 px-3 py-2 rounded text-sm transition-colors">
+              🏆 Join Tournament
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="chat-notifications" class="mt-4 space-y-2">
+    </div>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+a voir quand on lance tout avec un volume vierge,
+ducoup faire le set up entier de jenkins depuis le script
+
+ARGOCD GUI WORK: ✅
+ARGOCD  CLI SET UP:✅
+ARGOCD CLI WORK: ✅
+
+JENKINS GUI WORK:✅
+JENKINS CLI SET UP:⏳ (fix le fais que quand volume vierge doit faire le compte admin depuis le script)
+JENKINS CLI WORKS: ⏳ (marche besoin de quelque config pour login et set up, mais le works)
+
+
+j ai eu un fail de load de argocd quand je l ai start avec volume vierge mais la vm tournait en arriere plan et a pu buguer ducoup (a check)
+
+
+
+recuperer les token github et dockerhub 
+
+
+JENKINS GUI a automatiser
+
+jenkins step: mette le mdp admin, installe les recommanded packages, skip la acoount creation and stay as admin, and define the jenkins url as the current one, homepage
+avoir un plugin docker pipeline
+generer un token docker hub ou re use le meme et le mettre dans les credentials de jenkins (faut un token avec read/write pour push l image sur dokcer hub)
+avoir ton token github pour define ton username et mdp pour pouvoir git push (perms -> "contents" en read/write)
+
+
+a voir si je fix dans le jenkinsfile le fait que si il y a rien a push je trouve un moyen de oas avoir une erreur de push up to date

@@ -1,0 +1,6 @@
+ircserv
+dep
+obj
+*.d
+tests.out
+bot

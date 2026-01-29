@@ -1,0 +1,8 @@
+include:
+  - ./databases/docker-compose.yml
+  - ./elk/docker-compose.yml
+  - ./monitoring/docker-compose.yml
+
+networks:
+  app-net:
+    external: true

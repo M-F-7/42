@@ -1,0 +1,135 @@
+services:
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    ports:
+      - "${GATEWAY_PORT-8080}:8080"
+    depends_on:
+      - auth
+      - chat
+      - game
+      - settings
+      - stats
+      - tournaments
+      - user
+    networks:
+      - app-net
+    env_file:
+      - ../.env
+    environment:
+      - AUTH_URL=http://auth:4000
+      - CHAT_URL=http://chat:4001
+      - GAME_URL=http://game:4002
+      - SETTINGS_URL=http://settings:4003
+      - STATS_URL=http://stats:4004
+      - TOURNAMENTS_URL=http://tournaments:4005
+      - USER_URL=http://user:4006
+
+  auth:
+    build: ./auth
+    container_name: auth
+    ports:
+      - "${AUTH_PORT-4000}:4000"
+    env_file:
+      - ../.env
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  chat:
+    build: ./chat
+    container_name: chat
+    ports:
+      - "${CHAT_PORT-4001}:4001"
+    env_file:
+      - ../.env
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  game:
+    build: ./game
+    container_name: game
+    ports:
+      - "${GAME_PORT-4002}:4002"
+    env_file:
+      - ../.env
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  settings:
+    build: ./settings
+    container_name: settings
+    ports:
+      - "${SETTINGS_PORT-4003}:4003"
+    env_file:
+      - ../.env
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  stats:
+    build: ./stats
+    container_name: stats
+    ports:
+      - "${STATS_PORT-4004}:4004"
+    env_file:
+      - ../.env
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  tournaments:
+    build: ./tournaments
+    container_name: tournaments
+    ports:
+      - "${TOURNAMENTS_PORT-4005}:4005"
+    env_file:
+      - ../.env
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  user:
+    build: ./user
+    container_name: user
+    ports:
+      - "${USER_PORT-4006}:4006"
+    env_file:
+      - ../.env
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  app-net:
+    external: true

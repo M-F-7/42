@@ -1,0 +1,99 @@
+<!-- Section d'accueil -->
+<div class="max-w-7xl mx-auto space-y-8">
+  <!-- Message de bienvenue -->
+  <div class="text-center">
+    <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-pong-blue to-pong-green bg-clip-text text-transparent">
+      Welcome to Pong Arena!
+    </h2>
+    <p class="text-xl text-gray-400 mb-8">
+      Challenge your friends, participate in tournaments, and Grind!
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    
+    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 hover:border-pong-blue transition-colors group">
+      <div class="text-center">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">⚔️</div>
+        <h3 class="text-xl font-bold mb-2">Player vs Player</h3>
+        <p class="text-gray-400 mb-4">Challenge a friend in real-time</p>
+        <button onclick="startPvP()" class="w-full bg-pong-blue hover:bg-blue-700 py-2 rounded font-semibold transition-colors">
+          Play Now
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 hover:border-pong-green transition-colors group">
+      <div class="text-center">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🤖</div>
+        <h3 class="text-xl font-bold mb-2">Player vs AI</h3>
+        <p class="text-gray-400 mb-4">Challenge the artificial intelligence</p>
+        <button onclick="startPvIA()" class="w-full bg-pong-green hover:bg-green-700 py-2 rounded font-semibold transition-colors">
+          Play Against AI
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 hover:border-yellow-500 transition-colors group">
+      <div class="text-center">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🏆</div>
+        <h3 class="text-xl font-bold mb-2">Tournament</h3>
+        <p class="text-gray-400 mb-4">Participate in competitions</p>
+        <button onclick="showTournament()" class="w-full bg-yellow-600 hover:bg-yellow-700 py-2 rounded font-semibold transition-colors">
+          View Tournaments
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 hover:border-purple-500 transition-colors group">
+      <div class="text-center">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">💬</div>
+        <h3 class="text-xl font-bold mb-2">Chat</h3>
+        <p class="text-gray-400 mb-4">Discuss with the community</p>
+        <button onclick="showChat()" class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded font-semibold transition-colors">
+          Open Chat
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 hover:border-orange-500 transition-colors group">
+      <div class="text-center">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">📊</div>
+        <h3 class="text-xl font-bold mb-2">Stats</h3>
+        <p class="text-gray-400 mb-4">Check your performance</p>
+        <button onclick="showStats()" class="w-full bg-orange-600 hover:bg-orange-700 py-2 rounded font-semibold transition-colors">
+          View My Stats
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-gray-900/50 border border-gray-800 rounded-lg p-6 hover:border-indigo-500 transition-colors group">
+      <div class="text-center">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">⚙️</div>
+        <h3 class="text-xl font-bold mb-2">Game Settings</h3>
+        <p class="text-gray-400 mb-4">Customize your experience</p>
+        <button onclick="openGameSettings()" class="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded font-semibold transition-colors">
+          Configure Game
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-gray-900/30 border border-gray-800 rounded-lg p-6">
+    <h3 class="text-xl font-bold mb-4 text-center">🚀 Quick Start</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="text-center">
+        <div class="text-2xl font-bold text-pong-green">0</div>
+        <div class="text-sm text-gray-400">Connected Players</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold text-pong-blue">0</div>
+        <div class="text-sm text-gray-400">Ongoing Matches</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold text-yellow-500">0</div>
+        <div class="text-sm text-gray-400">Active Tournaments</div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,24 @@
+services:
+  sqlite:
+    build: ./Sqlite
+    container_name: sqlite
+    ports:
+      - "${SQLITE_PORT:-4007}:4007"
+    env_file:
+      - ../../.env
+    volumes:
+      - sqlite_data:/app/data
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  sqlite_data:
+
+networks:
+  app-net:
+    external: true

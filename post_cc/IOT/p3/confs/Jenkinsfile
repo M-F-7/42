@@ -1,0 +1,89 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(
+            name: 'VERSION',
+            choices: ['v1', 'v2'],
+            description: 'Choose the version to build'
+        )
+    }
+
+    stages {
+
+        stage('Build Image') {
+            steps {
+                script {
+                    def path = params.VERSION == 'v1' ? 'p3/v1' : 'p3/v2'
+                    echo "Building Docker image for ${params.VERSION} from ${path}"
+
+                    // Build l’image Docker via Jenkins
+                    def dockerImage = docker.build("${params.VERSION}:latest", path)
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    echo "Running container for ${params.VERSION}"
+
+                    // Lance le conteneur
+                    def container = docker.image("${params.VERSION}:latest").run("--network jenkins-net --name ${params.VERSION} -d -p 8889:8888")
+
+                    // Attendre un peu
+                    sleep 5
+
+                    // Test HTTP
+                    sh "curl http://${params.VERSION}:8888"
+
+                    // Stop + remove
+                    sh "docker rm -f ${container.id}"
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    sh "docker tag ${params.VERSION}:latest mfzeroseven/iot:${params.VERSION}"
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
+                        sh "docker push mfzeroseven/iot:${params.VERSION}"
+                    }
+                }
+            }
+        }
+
+        stage('Update mfernand-manifests') {
+            steps {
+                dir("${WORKSPACE}") {
+                    withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                        sh """
+                            rm -rf mfernand-manifests
+                            git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/M-F-7/mfernand-manifests.git
+
+                            sed -i "s|image: 'mfzeroseven/iot:.*'|image: 'mfzeroseven/iot:${params.VERSION}'|" mfernand-manifests/confs/deployment.yml
+
+                            cd mfernand-manifests
+
+                            git config user.email "jenkins@email"
+                            git config user.name "Jenkins name"
+
+                            git add .
+                            git commit -m "Updating manifests from Jenkins with version: ${params.VERSION}"
+                            git push https://${GIT_USER}:${GIT_TOKEN}@github.com/M-F-7/mfernand-manifests.git
+                        """
+                    }
+
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "docker rmi ${params.VERSION}:latest || true"
+            sh "docker rmi mfzeroseven/iot:${params.VERSION} || true"
+        }
+    }
+}

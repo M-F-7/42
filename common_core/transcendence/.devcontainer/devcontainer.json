@@ -1,0 +1,18 @@
+{
+  "name": "Transcendence Backend",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "backend",
+  "workspaceFolder": "/app",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "typescript.validate.enable": true
+      }
+    }
+  },
+  "postCreateCommand": "npm install"
+}

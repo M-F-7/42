@@ -1,0 +1,73 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# p1/Vagrantfile
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  ## Machine 1 : K3s Server
+  config.vm.define "rwassimS" do |srv|
+    srv.vm.hostname = "rwassimS"
+    srv.vm.network "private_network", ip: "192.168.56.110"
+
+    srv.vm.provider :libvirt do |hv|
+      hv.cpus = 1
+      hv.memory = 1024
+      hv.driver = "kvm"
+      hv.machine_type = "pc"
+      hv.uri = "qemu:///system"
+    end
+
+    srv.vm.provision "shell", path: "scripts/init_server.sh"
+  end
+
+  ## Machine 2 : K3s Worker
+  config.vm.define "rwassimSW" do |wrk|
+    wrk.vm.hostname = "rwassimSW"
+    wrk.vm.network "private_network", ip: "192.168.56.111"
+
+    wrk.vm.provider :libvirt do |hv|
+      hv.cpus = 1
+      hv.memory = 1024
+      hv.driver = "kvm"
+      hv.machine_type = "pc"
+      hv.uri = "qemu:///system"
+    end
+
+    wrk.vm.provision "shell", path: "scripts/init_worker.sh"
+  end
+end
+
+
+# Vagrant.configure("2") do |config|
+
+#   config.vm.box = "debian/bullseye64"
+
+#   config.vm.define "rwassimS" do |server|
+#     server.vm.hostname = "rwassimS"
+#     server.vm.network "private_network", ip:"192.168.56.110"
+#     server.vm.provider :libvirt do |prov|
+#       prov.cpus = 1
+#       prov.memory = 1024
+#       prov.driver = "kvm"
+#       prov.machine_type = "pc"
+#       prov.uri = "qemu:///system"
+#     end
+#     server.vm.provision "shell", path: "./scripts/init_server.sh" 
+#   end
+
+#   config.vm.define "rwassimSW" do |worker|
+#     worker.vm.hostname = "rwassimSW"
+#     worker.vm.network "private_network", ip:"192.168.56.111"
+#     worker.vm.provider :libvirt do |prov|
+#       prov.cpus = 1
+#       prov.memory = 1024
+#       prov.driver = "kvm"
+#       prov.machine_type = "pc"
+#       prov.uri = "qemu:///system"
+#     end
+#     worker.vm.provision "shell", path: "./scripts/init_worker.sh" 
+#   end
+
+# end

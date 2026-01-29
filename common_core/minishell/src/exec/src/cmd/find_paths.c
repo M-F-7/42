@@ -1,0 +1,62 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   find_paths.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rwassim <rwassim@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/21 23:58:18 by mfernand          #+#    #+#             */
+/*   Updated: 2025/06/27 21:07:45 by rwassim          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "minishell.h"
+
+char	*find_path(char *cmd, char **envp)
+{
+	char	**path_lst;
+	char	*path_env;
+	char	*path_cmd;
+	int		i;
+
+	if (!cmd)
+		return (NULL);
+	if (ft_strchr(cmd, '/'))
+	{
+		if (access(cmd, X_OK) == 0)
+			return (ft_strdup(cmd));
+		return (NULL);
+	}
+	path_env = NULL;
+	path_cmd = NULL;
+	i = 0;
+	while (envp[i])
+		if (!ft_strncmp(envp[i++], "PATH=", 5))
+			path_env = envp[i - 1] + 5;
+	if (!path_env)
+		return (NULL);
+	path_lst = ft_split(path_env, ':');
+	if (!path_lst)
+		return (NULL);
+	return (link_path(path_lst, path_cmd, cmd));
+}
+
+char	*link_path(char **path_lst, char *path_cmd, char *cmd)
+{
+	int		i;
+	char	*tmp;
+
+	i = 0;
+	if (!path_lst || !cmd)
+		return (NULL);
+	while (path_lst[i])
+	{
+		tmp = ft_strjoin(path_lst[i++], "/");
+		path_cmd = ft_strjoin(tmp, cmd);
+		free(tmp);
+		if (access(path_cmd, X_OK) == 0)
+			return (free_array(path_lst), path_cmd);
+		free(path_cmd);
+	}
+	return (free_array(path_lst), NULL);
+}

@@ -1,0 +1,98 @@
+<div class="max-w-6xl mx-auto">
+  <div class="bg-gray-800 rounded-lg p-4 mb-6">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-6">
+        <div class="flex items-center space-x-4">
+          <span id="game-score-player1" class="text-3xl font-bold text-blue-400">0</span>
+          <span class="text-2xl font-bold text-gray-400">-</span>
+          <span id="game-score-player2" class="text-3xl font-bold text-red-400">0</span>
+          <span class="text-gray-400">Time:</span>
+          <span id="game-timer" class="text-yellow-400">00:00</span>
+        </div>
+        <div id="game-mode-info" class="text-sm text-gray-400">
+        </div>
+      </div>
+      <div class="flex space-x-2">
+        <button onclick="pauseGame()" class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded text-sm transition-colors">
+          ⏸️ Pause
+        </button>
+        <button onclick="restartGame()" class="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded text-sm transition-colors">
+          🔄 Restart
+        </button>
+        <button onclick="backToMenu()" class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm transition-colors">
+          🏠 Menu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-center">
+    <div id="game-board" class="relative bg-gradient-to-br from-green-800 to-green-900 border-4 border-white rounded-lg shadow-2xl overflow-hidden" style="width: 800px; height: 400px;">
+      <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-white transform -translate-x-1/2 opacity-50"></div>
+      
+      <div class="absolute left-1/2 top-1/2 w-20 h-20 border-2 border-white rounded-full transform -translate-x-1/2 -translate-y-1/2 opacity-30"></div>
+      
+      <div id="game-player1" class="absolute bg-blue-400 rounded shadow-lg transition-all duration-75" style="left: 2%; top: 45%; width: 12px; height: 80px;"></div>
+      
+      <div id="game-player2" class="absolute bg-red-400 rounded shadow-lg transition-all duration-75" style="right: 2%; top: 45%; width: 12px; height: 80px;"></div>
+      
+      <div id="game-ball" class="absolute bg-white rounded-full shadow-lg transition-all duration-75" style="left: 50%; top: 50%; width: 16px; height: 16px;"></div>
+      
+      <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex justify-center space-x-4">
+    <button onclick="showSection('settings')" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded transition-colors">
+      ⚙️ Settings
+    </button>
+    <button onclick="showSection('home')" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded transition-colors">
+      🏠 Main Menu
+    </button>
+  </div>
+</div>
+
+<!-- Overlay de pause -->
+<div id="game-pause-overlay" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50">
+  <div class="flex items-center justify-center h-full">
+    <div class="bg-gray-800 rounded-lg p-8 text-center max-w-md w-full mx-4">
+      <h3 class="text-2xl font-bold mb-4">⏸️ Game Paused</h3>
+      <p class="text-gray-400 mb-6">The game is temporarily suspended</p>
+      <div class="space-y-3">
+        <button onclick="resumeGame()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition-colors">
+          ▶️ Resume
+        </button>
+        <button onclick="restartGame()" class="w-full bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded transition-colors">
+          🔄 Restart
+        </button>
+        <button onclick="showSection('settings')" class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded transition-colors">
+          ⚙️ Settings
+        </button>
+        <button onclick="backToMenu()" class="w-full bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors">
+          🏠 Main Menu
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="game-end-overlay" class="hidden fixed inset-0 bg-black bg-opacity-80 z-50">
+  <div class="flex items-center justify-center h-full">
+    <div class="bg-gray-800 rounded-lg p-8 text-center max-w-md w-full mx-4">
+      <h3 id="game-winner-text" class="text-3xl font-bold mb-4">🏆 Victory!</h3>
+      <p id="game-final-score" class="text-lg mb-4 text-gray-300">Final Score: 0 - 0</p>
+      <p id="game-duration" class="text-sm text-gray-400 mb-6">Duration: 0:00</p>
+      <div class="space-y-3">
+        <button onclick="restartGame()" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition-colors">
+          🔄 Replay
+        </button>
+        <button onclick="showSection('settings')" class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded transition-colors">
+          ⚙️ Change Settings
+        </button>
+        <button onclick="backToMenu()" class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors">
+          🏠 Main Menu
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

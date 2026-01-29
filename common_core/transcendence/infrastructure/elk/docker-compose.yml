@@ -1,0 +1,75 @@
+services:
+  elasticsearch:
+    build: ./elasticsearch
+    container_name: elasticsearch
+    ports:
+      - "${ELASTICSEARCH_PORT:-4008}:9200"
+      - "${ELASTICSEARCH_PORT_2:-4009}:9300"
+    env_file:
+      - ../../.env
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  kibana:
+    build: ./kibana
+    container_name: kibana
+    ports:
+      - "${KIBANA_PORT:-4010}:5601"
+    env_file:
+      - ../../.env
+    environment:
+      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+    networks:
+      - app-net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  logstash:
+    build: ./logstash
+    container_name: logstash
+    ports:
+      - "${LOGSTASH_PORT:-4011}:5000"
+      - "${LOGSTASH_PORT_2:-4012}:5044"
+      - "${LOGSTASH_PORT_3:-4013}:9600"
+    env_file:
+      - ../../.env
+    environment:
+      - "LS_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+    networks:
+      - app-net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  elasticsearch_data:
+
+networks:
+  app-net:
+    external: true
