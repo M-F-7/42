@@ -3,15 +3,7 @@ services:
     build: ./gateway
     container_name: gateway
     ports:
-      - "${GATEWAY_PORT-8080}:8080"
-    depends_on:
-      - auth
-      - chat
-      - game
-      - settings
-      - stats
-      - tournaments
-      - user
+      - "3001:3001"
     networks:
       - app-net
     env_file:
@@ -24,112 +16,60 @@ services:
       - STATS_URL=http://stats:4004
       - TOURNAMENTS_URL=http://tournaments:4005
       - USER_URL=http://user:4006
+    volumes:
+      - ../ssl/certs:/app/data/certs
+      - sqlite_data:/app/data
 
   auth:
     build: ./auth
+    user: "0:0"
     container_name: auth
-    ports:
-      - "${AUTH_PORT-4000}:4000"
     env_file:
       - ../.env
     networks:
       - app-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  chat:
-    build: ./chat
-    container_name: chat
-    ports:
-      - "${CHAT_PORT-4001}:4001"
-    env_file:
-      - ../.env
-    networks:
-      - app-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    volumes:
+      - sqlite_data:/app/data
 
   game:
     build: ./game
     container_name: game
-    ports:
-      - "${GAME_PORT-4002}:4002"
     env_file:
       - ../.env
     networks:
       - app-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  settings:
-    build: ./settings
-    container_name: settings
-    ports:
-      - "${SETTINGS_PORT-4003}:4003"
-    env_file:
-      - ../.env
-    networks:
-      - app-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4003/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  stats:
-    build: ./stats
-    container_name: stats
-    ports:
-      - "${STATS_PORT-4004}:4004"
-    env_file:
-      - ../.env
-    networks:
-      - app-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4004/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    volumes:
+      - sqlite_data:/app/data
 
   tournaments:
     build: ./tournaments
+    user: "0:0"
     container_name: tournaments
-    ports:
-      - "${TOURNAMENTS_PORT-4005}:4005"
     env_file:
       - ../.env
     networks:
       - app-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4005/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    volumes:
+      - sqlite_data:/app/data
 
   user:
     build: ./user
     container_name: user
-    ports:
-      - "${USER_PORT-4006}:4006"
+    user: "0:0"
     env_file:
       - ../.env
     networks:
       - app-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4006/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    volumes:
+      - sqlite_data:/app/data
 
+# --------------------------
+# Réseau et Volume partagés
+# --------------------------
 networks:
   app-net:
-    external: true
+
+
+volumes:
+  transcendence-data:
+  sqlite_data:

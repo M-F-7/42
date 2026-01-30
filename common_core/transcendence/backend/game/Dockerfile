@@ -1,20 +1,22 @@
-FROM node:18-alpine
+### STAGE 1: Build ###
 
-RUN apk add --no-cache curl
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
-
-RUN npm install --omit=dev && npm cache clean --force
 COPY . .
 
-RUN addgroup -g 10002 -S gamegroup && \
-    adduser -S gameuser -u 10002 -G gamegroup
+RUN npm install && npm run build
 
-RUN chown -R gameuser:gamegroup /app
-USER gameuser
+### STAGE 2: Production ###
 
-EXPOSE 4002
+FROM node:18-alpine AS production
 
-CMD ["node", "index.js"]
+WORKDIR /app
+
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+
+CMD ["node", "dist/index.js"]
+

@@ -7,7 +7,10 @@ RUN mkdir -p /etc/grafana/provisioning/dashboards && \
     mkdir -p /var/lib/grafana/dashboards
 
 COPY config/grafana.ini /etc/grafana/grafana.ini
-COPY config/dashboards/ /etc/grafana/provisioning/dashboards/
+COPY config/datasources/ /etc/grafana/provisioning/datasources/
+COPY config/dashboards/dashboard.yml /etc/grafana/provisioning/dashboards/
+COPY config/dashboards/*.json /var/lib/grafana/dashboards/
+
 
 USER grafana
 

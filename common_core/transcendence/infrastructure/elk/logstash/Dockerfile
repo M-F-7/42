@@ -17,6 +17,6 @@ RUN chown logstash:logstash /usr/share/logstash/config/logstash.yml && \
 
 USER logstash
 
-EXPOSE 5000 5044 9600
+EXPOSE 5000
 
 CMD ["/usr/share/logstash/bin/logstash"]

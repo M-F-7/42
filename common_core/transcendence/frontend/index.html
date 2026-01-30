@@ -1,59 +1,171 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GPOAT - Game Platform</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'pong-dark': '#0f0f23',
-            'pong-blue': '#1e40af',
-            'pong-green': '#10b981'
-          }
-        }
+  <style>
+    @keyframes ballPreview {
+      0% {
+        transform: translateX(-30px);
+      }
+
+      100% {
+        transform: translateX(30px);
       }
     }
-  </script>
+
+    @keyframes playerPreview {
+      0% {
+        transform: translateY(-10px);
+      }
+
+      100% {
+        transform: translateY(10px);
+      }
+    }
+  </style>
 </head>
 
-<body class="bg-pong-dark text-white min-h-screen">
+<body class="bg-gradient-to-b from-[#0e0e1a] to-[#14142b] text-white min-h-screen">
   <!-- Navigation Header -->
-  <nav class="bg-black/50 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <nav class="sticky top-0 z-50 px-4 pt-4 pb-4">
+    <div
+      class="max-w-7xl mx-auto bg-black/30 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg shadow-black/20 px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex items-center">
-          <button onclick="showSection('home')" class="text-2xl font-bold text-pong-green hover:text-green-300 transition-colors">
+          <button data-action="navigate-home"
+            class="text-2xl font-bold text-pong-green hover:text-green-300 transition-colors" data-i18n-key="nav.brand">
             🏓 GPOAT
           </button>
         </div>
-        
+
         <div class="hidden md:flex items-center space-x-6">
-          <button onclick="showSection('home')" class="hover:text-pong-blue transition-colors">Home</button>
-          <button onclick="showSection('game')" class="hover:text-pong-green transition-colors">Play</button>
-          <button onclick="showSection('tournament')" class="hover:text-yellow-400 transition-colors">Tournaments</button>
-          <button onclick="showSection('chat')" class="hover:text-purple-400 transition-colors">Chat</button>
-          <button onclick="showSection('stats')" class="hover:text-orange-400 transition-colors">Stats</button>
-          <button onclick="showSection('settings')" class="hover:text-cyan-400 transition-colors">Settings</button>
+          <button data-action="navigate-home" class="hover:text-pong-blue transition-colors"
+            data-i18n-key="nav.home">Home</button>
+          <button data-action="start-pvp" class="hover:text-pong-green transition-colors"
+            data-i18n-key="nav.play">Play</button>
+          <button data-action="navigate-tournament" class="hover:text-yellow-400 transition-colors"
+            data-i18n-key="nav.tournaments">Tournaments</button>
+          <button id="nav-stats-button" data-action="navigate-stats"
+            class="hidden hover:text-orange-400 transition-colors" data-i18n-key="nav.stats">Stats</button>
         </div>
 
         <div class="flex items-center space-x-4">
-          <div id="user-info" class="hidden">
-            <div class="flex items-center space-x-3">
-              <span class="text-gray-300">Hi,  <span id="user-name" class="text-pong-green font-semibold"></span></span>
-              <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition-colors">
-                Logout
+          <div class="hidden md:flex items-center space-x-3 mr-4">
+            <!-- Switch langue -->
+            <div class="flex items-center space-x-1 border border-gray-700 rounded-full px-2 py-1 text-xs">
+              <button data-action="set-language" data-lang="en" class="px-1 hover:text-pong-blue">EN</button>
+              <span class="text-gray-600">|</span>
+              <button data-action="set-language" data-lang="fr" class="px-1 hover:text-pong-blue">FR</button>
+              <span class="text-gray-600">|</span>
+              <button data-action="set-language" data-lang="es" class="px-1 hover:text-pong-blue">ES</button>
+            </div>
+
+            <!-- Accessibilité -->
+            <div class="flex items-center space-x-1 text-xs">
+              <button data-action="toggle-high-contrast" data-i18n-key="accessibility.highContrastOn"
+                class="px-2 py-1 border border-gray-700 rounded-full hover:bg-gray-800">
+                High contrast
+              </button>
+              <button data-action="decrease-font" data-i18n-key="accessibility.fontMinus"
+                class="px-2 py-1 border border-gray-700 rounded-full hover:bg-gray-800">
+                A-
+              </button>
+              <button data-action="increase-font" data-i18n-key="accessibility.fontPlus"
+                class="px-2 py-1 border border-gray-700 rounded-full hover:bg-gray-800">
+                A+
               </button>
             </div>
           </div>
+
+          <div id="user-info" class="hidden flex items-center gap-3">
+            <!-- Notification Icon -->
+            <div class="relative">
+              <button id="notifications-button" aria-label="Open notifications"
+                class="relative p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
+                <svg class="w-6 h-6 text-gray-400 hover:text-white transition-colors" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span id="notification-badge"
+                  class="hidden absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
+              </button>
+
+              <!-- Notifications Dropdown -->
+              <div id="notifications-dropdown"
+                class="hidden absolute right-0 mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg shadow-lg overflow-hidden z-50">
+                <div class="px-4 py-3 border-b border-gray-700 flex justify-between items-center">
+                  <h3 class="font-bold text-white" data-i18n-key="notifications.title">Notifications</h3>
+                  <button class="text-xs text-gray-400 hover:text-white">Clear all</button>
+                </div>
+                <div id="notifications-list" class="max-h-96 overflow-y-auto">
+                  <!-- Notifications will be added here dynamically -->
+                  <div class="px-4 py-3 text-center text-gray-400 text-sm" data-i18n-key="notifications.empty">
+                    No notifications
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- User Menu -->
+            <div class="relative">
+              <button id="user-menu-button"
+                class="flex items-center space-x-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
+                <div id="nav-user-avatar"
+                  class="w-8 h-8 rounded-full bg-pong-blue flex items-center justify-center text-white text-sm font-bold overflow-hidden">
+                  <span id="nav-avatar-initial">A</span>
+                </div>
+                <span class="text-gray-300">Hi, <span id="user-name"
+                    class="text-pong-green font-semibold"></span></span>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div id="user-menu-dropdown"
+                class="hidden absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-lg shadow-lg overflow-hidden z-50">
+                <button data-action="navigate-profile"
+                  class="w-full text-left px-4 py-3 hover:bg-gray-800 transition-colors text-gray-300 hover:text-white flex items-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Edit Profile
+                </button>
+                <button data-action="navigate-friendlist"
+                  class="w-full text-left px-4 py-3 hover:bg-gray-800 transition-colors text-gray-300 hover:text-white flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Friendlist
+                  </div>
+                  <span id="friend-request-badge"
+                    class="hidden bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                </button>
+                <hr class="border-gray-700 my-1">
+                <button data-action="logout"
+                  class="w-full text-left px-4 py-3 hover:bg-red-600/20 transition-colors text-gray-300 hover:text-red-400 flex items-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
           <div id="auth-buttons" class="flex space-x-2">
-            <button onclick="showLogin()" class="bg-pong-blue hover:bg-blue-700 px-4 py-2 rounded transition-colors">
+            <button data-action="show-login" class="bg-pong-blue hover:bg-blue-700 px-4 py-2 rounded transition-colors"
+              data-i18n-key="auth.login">
               Login
             </button>
-            <button onclick="showRegister()" class="bg-pong-green hover:bg-green-700 px-4 py-2 rounded transition-colors">
+            <button data-action="show-register"
+              class="bg-pong-green hover:bg-green-700 px-4 py-2 rounded transition-colors"
+              data-i18n-key="auth.register">
               Register
             </button>
           </div>
@@ -65,40 +177,516 @@
   <main id="main-content" class="flex-1">
   </main>
 
+  <!-- Auth Modal -->
   <div id="auth-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
     <div class="flex items-center justify-center h-full">
-      <div class="bg-gray-900 p-8 rounded-lg max-w-md w-full mx-4 border border-gray-700">
+      <div class="bg-gray-900 p-8 rounded-lg max-w-md w-full mx-4 border border-gray-700 relative">
         <h3 id="auth-title" class="text-2xl font-bold mb-6 text-center"></h3>
         <form id="auth-form" class="space-y-4">
-          <input type="text" id="auth-username" placeholder="Username" required
-                 class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors">
-          <input type="password" id="auth-password" placeholder="Password" required
-                 class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors">
-          <input type="email" id="auth-email" placeholder="Email" 
-                 class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors">
+          <input type="text" id="auth-username" placeholder="Username" required data-i18n-key="auth.username"
+            class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors">
+          <input type="password" id="auth-password" placeholder="Password" required data-i18n-key="auth.username"
+            class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors">
+          <input type="email" id="auth-email" data-i18n-key="auth.email" placeholder="Email"
+            class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors">
           <button type="submit" id="auth-submit" class="w-full py-2 rounded font-semibold transition-colors"></button>
         </form>
-        <button onclick="closeAuth()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl transition-colors">
+        <div class="mt-4 flex items-center">
+          <div class="flex-1 h-px bg-gray-700"></div>
+          <span class="px-2 text-xs text-gray-500 uppercase" data-i18n-key="auth.or">or</span>
+          <div class="flex-1 h-px bg-gray-700"></div>
+        </div>
+
+        <button type="button" data-action="login-github"
+          class="mt-4 w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 py-2 rounded font-semibold text-sm text-white transition-colors">
+          <!-- mini icône GitHub -->
+          <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 
+              7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49
+              -2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+              -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82
+              .72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07
+              -1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+              -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18
+              1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04
+              2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82
+              1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54
+              1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013
+              8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+            </path>
+          </svg>
+          <span data-i18n-key="auth.github">Continue with GitHub</span>
+        </button>
+        <button data-action="close-auth" aria-label="Close authentication modal"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl transition-colors">
           ✕
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Loading indicator -->
-  <div id="loading-indicator" class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40">
+  <!-- Profile Edit Modal -->
+  <div id="profile-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
     <div class="flex items-center justify-center h-full">
-      <div class="bg-gray-900 rounded-lg p-6 border border-gray-700">
-        <div class="flex items-center space-x-3">
-          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-pong-blue"></div>
-          <span class="text-gray-300">Loading...</span>
+      <div class="bg-gray-900 p-8 rounded-lg max-w-md w-full mx-4 border border-gray-700 relative">
+        <!-- Back Button (visible only in password view) -->
+        <button data-action="profile-back"
+          class="hidden absolute top-4 left-4 text-gray-400 hover:text-white text-xl transition-colors flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
+
+        <button data-action="close-profile" aria-label="Close profile modal"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl transition-colors">
+          ✕
+        </button>
+
+        <!-- Main Profile View -->
+        <div id="profile-main-view">
+          <h3 class="text-2xl font-bold mb-6 text-center text-white">Edit Profile</h3>
+          <form id="profile-form" class="space-y-4">
+            <!-- Profile Picture -->
+            <div class="flex flex-col items-center mb-4">
+              <div class="relative mb-3">
+                <div id="profile-avatar-preview"
+                  class="w-24 h-24 rounded-full bg-pong-blue flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
+                  <span>A</span>
+                </div>
+                <label for="profile-avatar-upload"
+                  class="absolute bottom-0 right-0 w-8 h-8 bg-pong-green rounded-full flex items-center justify-center cursor-pointer hover:bg-green-700 transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </label>
+                <input type="file" id="profile-avatar-upload" accept="image/*" class="hidden">
+              </div>
+              <p class="text-sm text-gray-400">Click to upload a profile picture</p>
+              <p id="profile-user-id" class="text-xs text-gray-500 mt-1"></p>
+            </div>
+            <!-- Stats joueur -->
+            <div id="profile-stats" class="mt-4 grid grid-cols-2 gap-3">
+              <div class="p-3 rounded bg-gray-800/60">
+                <div class="text-xs text-gray-400">Games played</div>
+                <div id="profile-games-played" class="text-lg font-semibold text-white">0</div>
+              </div>
+              <div class="p-3 rounded bg-gray-800/60">
+                <div class="text-xs text-gray-400">Wins</div>
+                <div id="profile-games-won" class="text-lg font-semibold text-green-400">0</div>
+              </div>
+              <div class="p-3 rounded bg-gray-800/60">
+                <div class="text-xs text-gray-400">Losses</div>
+                <div id="profile-games-lost" class="text-lg font-semibold text-red-400">0</div>
+              </div>
+              <div class="p-3 rounded bg-gray-800/60">
+                <div class="text-xs text-gray-400">Win rate</div>
+                <div id="profile-win-rate" class="text-lg font-semibold text-white">0%</div>
+              </div>
+            </div>
+            <!-- Username -->
+            <div>
+              <label for="profile-username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+              <input type="text" id="profile-username" placeholder="Username" required
+                class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors text-white">
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="profile-email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+              <input type="email" id="profile-email" placeholder="Email" required
+                class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors text-white">
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="profile-password-display"
+                class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+              <input type="password" id="profile-password-display" placeholder="••••••••" disabled
+                class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-gray-500 cursor-not-allowed">
+            </div>
+
+            <!-- Change Password Button -->
+            <button type="button" data-action="show-password-view"
+              class="w-full bg-gray-800 hover:bg-gray-700 py-2 rounded font-semibold transition-colors text-white border border-gray-700">
+              <div class="flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Change Password
+              </div>
+            </button>
+
+            <!-- Submit Button -->
+            <button type="button" data-action="save-profile"
+              class="w-full bg-pong-blue hover:bg-blue-700 py-2 rounded font-semibold transition-colors text-white">
+              Save Changes
+            </button>
+          </form>
+        </div>
+
+        <!-- Password Change View -->
+        <div id="profile-password-view" class="hidden">
+          <h3 class="text-2xl font-bold mb-6 text-center text-white">Change Password</h3>
+          <form id="profile-password-form" class="space-y-4">
+            <!-- Current Password -->
+            <div>
+              <label for="profile-current-password" class="block text-sm font-medium text-gray-300 mb-2">Current
+                Password</label>
+              <input type="password" id="profile-current-password" placeholder="Enter current password" required
+                class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors text-white">
+            </div>
+
+            <!-- New Password -->
+            <div>
+              <label for="profile-new-password" class="block text-sm font-medium text-gray-300 mb-2">New
+                Password</label>
+              <input type="password" id="profile-new-password" placeholder="Enter new password" required
+                class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors text-white">
+            </div>
+
+            <!-- Confirm New Password -->
+            <div>
+              <label for="profile-confirm-password" class="block text-sm font-medium text-gray-300 mb-2">Confirm New
+                Password</label>
+              <input type="password" id="profile-confirm-password" placeholder="Confirm new password" required
+                class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors text-white">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" data-action="update-password"
+              class="w-full bg-pong-blue hover:bg-blue-700 py-2 rounded font-semibold transition-colors text-white">
+              Change Password
+            </button>
+          </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
-    <script src="app-unified.js"></script>
+  <!-- Friend Profile Modal -->
+  <div id="friend-profile-modal" class="fixed inset-0 z-50 bg-black/60 hidden z-50">
+    <div class="max-w-md mx-auto mt-20 bg-gray-900 rounded-lg p-6 border border-gray-700">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-white">Player Profile</h2>
+        <button class="text-gray-400 hover:text-white" data-action="close-friend-profile">✕</button>
+      </div>
+
+      <div class="flex items-center gap-4 mb-5">
+        <div id="friend-profile-avatar"
+          class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl font-bold overflow-hidden">
+          <span id="friend-profile-initial">U</span>
+        </div>
+        <div>
+          <div id="friend-profile-username" class="text-white text-lg font-semibold">Username</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-4 gap-3 text-center">
+        <div class="bg-gray-800 rounded p-3">
+          <div class="text-xs text-gray-400">Played</div>
+          <div id="friend-profile-played" class="text-lg text-white font-semibold">0</div>
+        </div>
+        <div class="bg-gray-800 rounded p-3">
+          <div class="text-xs text-gray-400">Win</div>
+          <div id="friend-profile-won" class="text-lg text-green-400 font-semibold">0</div>
+        </div>
+        <div class="bg-gray-800 rounded p-3">
+          <div class="text-xs text-gray-400">Lose</div>
+          <div id="friend-profile-lost" class="text-lg text-red-400 font-semibold">0</div>
+        </div>
+        <div class="bg-gray-800 rounded p-3">
+          <div class="text-xs text-gray-400">WR</div>
+          <div id="friend-profile-wr" class="text-lg text-white font-semibold">0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Friendlist Modal -->
+  <div id="friendlist-modal" class="hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm">
+    <div class="flex items-center justify-center h-full">
+      <div class="bg-gray-900 p-8 rounded-lg max-w-2xl w-full mx-4 border border-gray-700 relative">
+        <h3 class="text-2xl font-bold mb-6 text-center text-white" data-i18n-key="friendlist.title">Friendlist</h3>
+
+        <!-- Search Bar -->
+        <div class="mb-4">
+          <div class="flex gap-2">
+            <input type="text" id="friendlist-search" placeholder="Search friends..."
+              class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue transition-colors text-white placeholder-gray-500">
+            <button data-action="add-friend"
+              class="px-4 py-2 bg-pong-blue hover:bg-blue-700 text-white rounded font-semibold transition-colors whitespace-nowrap">
+              Add Friend
+            </button>
+          </div>
+          <div id="friendlist-error" class="hidden text-xs text-red-500 mt-1 px-1">
+            User not found
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex mb-4 border-b border-gray-700">
+          <button data-action="friendlist-friends-tab"
+            class="flex-1 py-2 px-4 text-center text-white font-semibold border-b-2 border-pong-blue">Friends</button>
+          <button data-action="friendlist-requests-tab"
+            class="flex-1 py-2 px-4 text-center text-gray-400 hover:text-white transition-colors">Requests</button>
+        </div>
+
+        <!-- Friends List -->
+        <div id="friends-list" class="max-h-96 overflow-y-auto space-y-2">
+          <!-- Example friend -->
+          <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-pong-blue flex items-center justify-center text-white font-bold">
+                A
+              </div>
+              <div>
+                <div class="text-white font-semibold">Alex</div>
+                <div class="text-xs text-gray-400">Online</div>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button
+                class="px-3 py-1 bg-pong-green hover:bg-green-700 text-white rounded text-sm font-semibold transition-colors">
+                Challenge
+              </button>
+              <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                Message
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-pong-green flex items-center justify-center text-white font-bold">
+                M
+              </div>
+              <div>
+                <div class="text-white font-semibold">Mike</div>
+                <div class="text-xs text-gray-400">Offline</div>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button
+                class="px-3 py-1 bg-pong-green hover:bg-green-700 text-white rounded text-sm font-semibold transition-colors">
+                Challenge
+              </button>
+              <button class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors">
+                Message
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty state (hidden by default) -->
+          <div class="hidden text-center py-8 text-gray-400">
+            No friends yet. Start adding some!
+          </div>
+        </div>
+
+        <!-- Requests List -->
+        <div id="requests-list" class="hidden max-h-96 overflow-y-auto space-y-2">
+          <!-- Empty state -->
+          <div class="text-center py-8 text-gray-400">
+            No friend requests...
+          </div>
+        </div>
+
+        <button data-action="close-friendlist"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl transition-colors">
+          ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tournament Create Modal -->
+  <div id="tournament-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
+    <div class="flex items-center justify-center h-full">
+      <div class="bg-gray-900 p-6 rounded-lg max-w-md w-full mx-4 border border-gray-700 relative">
+        <h3 class="text-2xl font-bold mb-4 text-center text-white">
+          Create local tournament
+        </h3>
+
+        <div class="space-y-4">
+          <div>
+            <label for="tournament-name" class="block text-sm text-gray-300 mb-1">
+              Tournament name
+            </label>
+            <input id="tournament-name" type="text"
+              class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-pong-blue text-white"
+              placeholder="My awesome cup" value="Local 4-Player Cup" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Player 1</label>
+              <input id="tournament-player-1" type="text"
+                class="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-white"
+                placeholder="Player 1" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Player 2</label>
+              <input id="tournament-player-2" type="text"
+                class="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-white"
+                placeholder="Player 2" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Player 3</label>
+              <input id="tournament-player-3" type="text"
+                class="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-white"
+                placeholder="Player 3" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">Player 4</label>
+              <input id="tournament-player-4" type="text"
+                class="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-white"
+                placeholder="Player 4" />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-6">
+          <button data-action="close-tournament-modal" class="px-3 py-2 text-sm text-gray-300 hover:text-white">
+            Cancel
+          </button>
+          <button data-action="confirm-create-tournament"
+            class="px-4 py-2 text-sm bg-yellow-500 hover:bg-yellow-400 text-black rounded font-semibold">
+            Create
+          </button>
+        </div>
+
+        <button data-action="close-tournament-modal"
+          class="absolute top-3 right-3 text-gray-400 hover:text-white text-xl">
+          ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tournament Result Modal -->
+  <div id="tournament-result-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
+    <div class="flex items-center justify-center h-full">
+      <div class="bg-gray-900 p-6 rounded-lg max-w-md w-full mx-4 border border-gray-700 relative">
+        <h3 class="text-xl font-bold mb-3 text-white">
+          Match result
+        </h3>
+        <p id="tournament-result-players" class="text-sm text-gray-300 mb-4">
+          <!-- rempli en JS: "Alice vs Bob" -->
+        </p>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Score Player 1</label>
+            <input id="tournament-score-1" type="number" min="0"
+              class="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Score Player 2</label>
+            <input id="tournament-score-2" type="number" min="0"
+              class="w-full px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-white" />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button data-action="close-tournament-result-modal" class="px-3 py-2 text-sm text-gray-300 hover:text-white">
+            Cancel
+          </button>
+          <button data-action="confirm-tournament-result"
+            class="px-4 py-2 text-sm bg-pong-green hover:bg-green-700 text-black rounded font-semibold">
+            Save result
+          </button>
+        </div>
+
+        <button data-action="close-tournament-result-modal"
+          class="absolute top-3 right-3 text-gray-400 hover:text-white text-xl">
+          ✕
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="tournament-settings-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
+    <div class="flex items-center justify-center h-full">
+      <div class="bg-gray-900 p-6 rounded-lg max-w-lg w-full mx-4 border border-gray-700 relative">
+        <h3 class="text-xl font-bold mb-4 text-white">
+          Tournament game settings
+        </h3>
+        <p class="text-sm text-gray-400 mb-4">
+          These settings will be used for all matches in this local tournament.
+        </p>
+
+        <div class="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
+          <!-- Ball Speed -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-gray-300">Ball speed</label>
+              <span id="tournament-ball-speed-value" class="text-pong-blue font-semibold">0.3</span>
+            </div>
+            <input type="range" id="tournament-ball-speed" min="0.3" max="1.0" step="0.1" value="0.3" class="w-full">
+          </div>
+
+          <!-- Ball Size -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-gray-300">Ball size</label>
+              <span id="tournament-ball-size-value" class="text-pong-blue font-semibold">2.0</span>
+            </div>
+            <input type="range" id="tournament-ball-size" min="0.5" max="5.0" step="0.5" value="2.0" class="w-full">
+          </div>
+
+          <!-- Player Speed -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-gray-300">Player speed</label>
+              <span id="tournament-player-speed-value" class="text-pong-blue font-semibold">1.0</span>
+            </div>
+            <input type="range" id="tournament-player-speed" min="0.5" max="3.0" step="0.1" value="1.0" class="w-full">
+          </div>
+
+          <!-- Player Size -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-gray-300">Player size</label>
+              <span id="tournament-player-size-value" class="text-pong-blue font-semibold">30</span>
+            </div>
+            <input type="range" id="tournament-player-size" min="10" max="50" step="5" value="30" class="w-full">
+          </div>
+
+          <!-- Win Score -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-gray-300">Win score</label>
+              <span id="tournament-win-score-value" class="text-pong-blue font-semibold">7</span>
+            </div>
+            <input type="range" id="tournament-win-score" min="3" max="21" step="1" value="7" class="w-full">
+          </div>
+        </div>
+
+        <div class="mt-5 flex gap-3">
+          <button data-action="close-tournament-settings"
+            class="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-lg font-semibold transition-colors">
+            Back
+          </button>
+          <button data-action="confirm-tournament-settings"
+            class="flex-1 bg-pong-green hover:bg-green-700 text-black py-2 rounded-lg font-semibold transition-colors">
+            Use these settings & start
+          </button>
+        </div>
+
+        <button data-action="close-tournament-settings"
+          class="absolute top-3 right-3 text-gray-400 hover:text-white text-xl">
+          ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- TypeScript Module -->
+  <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>

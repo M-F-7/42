@@ -1,8 +1,46 @@
-### SIMULATE CLIENT INTERFACE WHEN USE SEND REQUEST
-GET http://localhost:8080 
-
-
-
+GET https://localhost:3001/injection?id=1%20OR%201=1
 
 ### SIMULATE CLIENT INTERFACE WHEN USE SEND REQUEST
-GET http://localhost:8080/src/Game.html
+POST https://localhost:3001/injection
+Content-Type: application/json
+
+# {"user":{"name":"bob","bio":"nice guy; DROP TABLE orders; --"}}
+# {
+#     "hello": "<script>alert('XSS')</script>"
+# }
+#  {"username":"admin\" OR \"1\"=\"1","password":"irrelevant"}
+# {"email":"victim@example.com; DROP TABLE users; --"}
+# {"search":"1 UNION SELECT username,password FROM users"}
+{"note":"O\\'Reilly is a name"}
+### SIMULATE CLIENT INTERFACE WHEN USE SEND REQUEST
+POST  https://localhost:3001/user/profile/user-1764339471610
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTE3NjQzMzk0NzE2MTAiLCJ1c2VybmFtZSI6IkR5bGFuQy1Db2RlIiwiZW1haWwiOiJkeWxhbmMuY29kZUBnbWFpbC5jb20iLCJpYXQiOjE3NjQzMzk0NzF9.v83i05Gy-xpdVdTYANce6qtsJomr_a89Wtou0UCXLuQ
+Content-Type: application/json
+
+{
+	"status": "<script>alert('\"XSS')</script>"
+}
+
+### AM
+POST http://localhost:4002/game/save
+Authorization: Bearer
+Content-Type: application/json
+
+{
+    "mode": "jambon",
+    "settings": {
+        "difficulty": "hard",
+        "map": "classic"
+    },
+    "player1": 10,
+    "player2": 8
+}
+
+### GET ALL GAMES
+GET https://localhost:3001/game/profile/user-1763754480784
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTE3NjQzMzk0NzE2MTAiLCJ1c2VybmFtZSI6IkR5bGFuQy1Db2RlIiwiZW1haWwiOiJkeWxhbmMuY29kZUBnbWFpbC5jb20iLCJpYXQiOjE3NjQzMzk0NzF9.v83i05Gy-xpdVdTYANce6qtsJomr_a89Wtou0UCXLuQ
+
+
+
+### CHECK GAME SERVICE HEALTH
+GET http://localhost:4002/game/health

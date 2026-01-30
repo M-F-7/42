@@ -1,199 +1,117 @@
+
 import bcrypt from 'bcryptjs';
+import { dbService } from './databaseService';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { dbService } from '../../src/services/databaseService.js';
-import { User, LoginRequest, RegisterRequest, ApiResponse } from '../../utils/interfaces.js';
-import { config } from '../../gateway/src/config.js';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
 
 export class AuthService {
-  async register(userData: RegisterRequest): Promise<ApiResponse<{ user: Omit<User, 'password'>; token: string }>> {
-    try {
-      const existingUser = await dbService.getUserByUsername(userData.username);
-      if (existingUser) {
-        return {
-          success: false,
-          error: 'Username already exists',
-          timestamp: new Date()
-        };
-      }
+	async register(username: string, password: string, email: string) {
+		if (!username || !password || !email) {
+			return { success: false, message: 'Missing fields' };
+		}
 
-      const existingEmail = await dbService.getUserByEmail(userData.email);
-      if (existingEmail) {
-        return {
-          success: false,
-          error: 'Email already exists',
-          timestamp: new Date()
-        };
-      }
+		const existingByUsername = await dbService.getUserByUsername(username);
+		if (existingByUsername) {
+			return { success: false, message: 'Username already taken' };
+		}
 
-      const hashedPassword = await bcrypt.hash(userData.password, config.bcrypt.saltRounds); // hashing password
+		const existingByEmail = await dbService.getUserByEmail(email);
+		if (existingByEmail) {
+			return { success: false, message: 'Email already taken' };
+		}
 
-      // Create user
-      const user = await dbService.createUser({
-        username: userData.username,
-        email: userData.email,
-        password: hashedPassword,
-        role: 'user'
-      });
+		const hashed = await bcrypt.hash(password, 10);
+		const id =
+			'user-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString());
 
-      // Generate token
-      const token = this.generateToken(user.id);
+		await dbService.createUser({
+			id,
+			username,
+			email,
+			password: hashed,
+		});
 
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
+		const user = { id, username, email };
 
-      return {
-        success: true,
-        data: {
-          user: userWithoutPassword,
-          token
-        },
-        message: 'User registered successfully',
-        timestamp: new Date()
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Registration failed',
-        timestamp: new Date()
-      };
-    }
-  }
 
-  async login(loginData: LoginRequest): Promise<ApiResponse<{ user: Omit<User, 'password'>; token: string }>> {
-    try {
-      // Find user
-      const user = await dbService.getUserByUsername(loginData.username);
-      if (!user || !user.password) {
-        return {
-          success: false,
-          error: 'Invalid credentials',
-          timestamp: new Date()
-        };
-      }
+		const token = jwt.sign(
+			{
+				sub: user.id,
+				username: user.username,
+				email: user.email,
+			},
+			JWT_SECRET as any,
+			{
+				expiresIn: JWT_EXPIRES_IN,
+			} as any
+		);
 
-      // Check password
-      const isValidPassword = await bcrypt.compare(loginData.password, user.password);
-      if (!isValidPassword) {
-        return {
-          success: false,
-          error: 'Invalid credentials',
-          timestamp: new Date()
-        };
-      }
+		return {
+			success: true,
+			data: {
+				user,
+				token,
+			},
+		};
+	}
 
-      // Update user status
-      await dbService.updateUser(user.id, {
-        isOnline: true,
-        lastActive: new Date()
-      });
+	async login(username: string, password: string) {
+		if (!username || !password) {
+			return { success: false, message: 'Missing credentials' };
+		}
 
-      // Generate token
-      const token = this.generateToken(user.id);
+		const userRow = await dbService.getUserByUsername(username);
+		if (!userRow) {
+			return { success: false, message: 'User not found' };
+		}
 
-      // Remove password from response
-      const { password: _, ...userWithoutPassword } = user;
+		const passwordMatch = await bcrypt.compare(password, userRow.password);
+		if (!passwordMatch) {
+			return { success: false, message: 'Invalid password' };
+		}
 
-      return {
-        success: true,
-        data: {
-          user: userWithoutPassword,
-          token
-        },
-        message: 'Login successful',
-        timestamp: new Date()
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Login failed',
-        timestamp: new Date()
-      };
-    }
-  }
+		const user = {
+			id: userRow.id,
+			username: userRow.username,
+			email: userRow.email,
+			language: userRow.language
+		};
 
-  async logout(userId: string): Promise<ApiResponse> {
-    try {
-      await dbService.updateUser(userId, {
-        isOnline: false,
-        lastActive: new Date()
-      });
+		const token = jwt.sign(
+			{
+				sub: user.id,
+				username: user.username,
+				email: user.email,
+			},
+			JWT_SECRET as any,
+			{
+				expiresIn: JWT_EXPIRES_IN,
+			} as any
+		);
 
-      return {
-        success: true,
-        message: 'Logout successful',
-        timestamp: new Date()
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Logout failed',
-        timestamp: new Date()
-      };
-    }
-  }
+		return {
+			success: true,
+			data: {
+				user,
+				token,
+			},
+		};
+	}
 
-  async verifyToken(token: string): Promise<ApiResponse<User>> {
-    try {
-      const decoded = jwt.verify(token, config.jwt.secret) as { userId: string };
-      const user = await dbService.getUserById(decoded.userId);
-      
-      if (!user) {
-        return {
-          success: false,
-          error: 'User not found',
-          timestamp: new Date()
-        };
-      }
+	async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<boolean> {
+		const user = await dbService.getUserById(userId);
+		if (!user) return false;
 
-      const { password: _, ...userWithoutPassword } = user;
-      return {
-        success: true,
-        data: userWithoutPassword as User,
-        timestamp: new Date()
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Invalid token',
-        timestamp: new Date()
-      };
-    }
-  }
+		const match = await bcrypt.compare(currentPassword, user.password);
+		if (!match) return false;
 
-  private generateToken(userId: string): string {
-    return jwt.sign(
-      { userId },
-      config.jwt.secret,
-      { expiresIn: '24h' } // Fixed value to avoid type issues
-    );
-  }
+		const hashed = await bcrypt.hash(newPassword, 10);
 
-  async getUserProfile(userId: string): Promise<ApiResponse<Omit<User, 'password'>>> {
-    try {
-      const user = await dbService.getUserById(userId);
-      if (!user) {
-        return {
-          success: false,
-          error: 'User not found',
-          timestamp: new Date()
-        };
-      }
+		await dbService.updateUserPassword(userId, hashed);
 
-      const { password: _, ...userWithoutPassword } = user;
-
-      return {
-        success: true,
-        data: userWithoutPassword,
-        timestamp: new Date()
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: 'Failed to get user profile',
-        timestamp: new Date()
-      };
-    }
-  }
+		return true;
+	}
 }
-
-export const authService = new AuthService();

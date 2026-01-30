@@ -25,10 +25,14 @@ UNDERLINE = \033[4m
 RESET = \033[0m
 
 
-all:
+all: certs
 	@echo "$(BOLD)$(BRIGHT_BLUE)Building $(DOCKER_NAME) 🐋$(RESET)"
-	@./infrastructure/docker-network/init_network.sh
 	@docker compose build && docker compose up -d
+	@docker exec -it elasticsearch bin/elasticsearch-users useradd test -p secret_elk -r kibana_system
+
+certs:
+	@echo "$(BOLD)$(BRIGHT_YELLOW)Generating SSL Certificates 🔐🛡️$(RESET)"
+	@./ssl/generate_certs.sh
 
 db-shell:
 	@echo "$(BOLD)$(BRIGHT_CYAN)SQLite Shell 🗄️$(RESET)"
@@ -44,5 +48,11 @@ stop:
 	@docker compose down
 
 clean:
-	@echo "$(BOLD)$(BRIGHT_GREEN)Cleaning some Shits 💩$(RESET)"
-	@docker system prune -a --volumes
+	@docker stop $$(docker ps -qa) 2>/dev/null || true
+	@docker rm $$(docker ps -qa) 2>/dev/null || true
+	@docker rmi -f $$(docker images -qa) 2>/dev/null || true
+	@docker volume rm $$(docker volume ls -q) 2>/dev/null || true
+	@docker network rm $$(docker network ls -q) 2>/dev/null || true
+
+dashboards:
+	@docker exec -it metricbeat metricbeat setup --dashboards

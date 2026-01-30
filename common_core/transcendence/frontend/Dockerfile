@@ -1,19 +1,24 @@
-FROM nginx:alpine
+FROM node:18-alpine AS build
+WORKDIR /app
 
+COPY package.json package-lock.json* ./
+COPY tsconfig.json vite.config.js postcss.config.js tailwind.config.js ./
+COPY index.html ./
+COPY src ./src
+COPY src/components ./src/components
+
+RUN npm install --silent --no-audit --progress=false && npm run build
+
+
+FROM nginx:alpine
 RUN apk add --no-cache openssl
 
-COPY index.html /usr/share/nginx/html/
-COPY app-unified.js /usr/share/nginx/html/
-COPY components/ /usr/share/nginx/html/components/
 
+RUN rm -rf /etc/nginx/templates
 
+COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN mkdir -p /etc/nginx/ssl && \
-    openssl genrsa -out /etc/nginx/ssl/nginx.key 2048 && \
-    openssl req -new -x509 -key /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt -days 365 \
-    -subj "/C=FR/ST=France/L=Paris/O=Dev/CN=localhost"
-
-EXPOSE 80 443
+EXPOSE 80 4443
 
 CMD ["nginx", "-g", "daemon off;"]

@@ -3,41 +3,46 @@ services:
     build: ./elasticsearch
     container_name: elasticsearch
     ports:
-      - "${ELASTICSEARCH_PORT:-4008}:9200"
-      - "${ELASTICSEARCH_PORT_2:-4009}:9300"
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
+      - "${ELASTICSEARCH_PORT_2:-9300}:9300"
     env_file:
       - ../../.env
     environment:
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - "discovery.type=single-node"
-      - "xpack.security.enabled=false"
+      - "ELASTIC_PASSWORD=${ELASTIC_PASSWORD}"
+      - "xpack.security.enabled=true"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+      - ../../ssl/certs/:/usr/share/elasticsearch/config/certs:ro\
     networks:
       - app-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      test: [ "CMD", "curl", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "-f", "https://localhost:9200/_cluster/health" ]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 60s
-
   kibana:
     build: ./kibana
     container_name: kibana
     ports:
-      - "${KIBANA_PORT:-4010}:5601"
+      - "${KIBANA_PORT:-5601}:5601"
     env_file:
       - ../../.env
     environment:
-      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+      - "ELASTICSEARCH_HOSTS=https://elasticsearch:9200"
+      - "ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}"
+      - "ELASTIC_PASSWORD=${ELASTIC_PASSWORD}"
     networks:
       - app-net
+    volumes:
+      - ../../ssl/certs/:/usr/share/kibana/config/certs:ro
     depends_on:
       elasticsearch:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+      test: [ "CMD", "curl", "-k", "-f", "https://localhost:5601/login" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -47,29 +52,47 @@ services:
     build: ./logstash
     container_name: logstash
     ports:
-      - "${LOGSTASH_PORT:-4011}:5000"
-      - "${LOGSTASH_PORT_2:-4012}:5044"
-      - "${LOGSTASH_PORT_3:-4013}:9600"
+      - "${LOGSTASH_PORT:-5000}:5000"
     env_file:
       - ../../.env
     environment:
       - "LS_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+      - "ELASTICSEARCH_HOSTS=https://elasticsearch:9200"
+      - "ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}"
+      - "ELASTIC_PASSWORD=${ELASTIC_PASSWORD}"
+    volumes:
+      - ../../ssl/certs/:/usr/share/logstash/certs:ro
     networks:
       - app-net
     depends_on:
       elasticsearch:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9600"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+
+  metricbeat:
+      build: ./metricbeat
+      container_name: metricbeat
+      privileged: true
+      env_file:
+        - ../../.env
+      volumes:
+        - /proc:/hostfs/proc:ro
+        - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+        - /var:/hostfs/var:ro
+        - /home:/hostfs/home:ro
+        - ../../ssl/certs/:/usr/share/metricbeat/certs:ro
+      depends_on:
+        kibana:
+          condition: service_healthy
+        elasticsearch:
+          condition: service_healthy
+      networks:
+      - app-net
 
 volumes:
   elasticsearch_data:
 
+
 networks:
   app-net:
-    external: true
+
+

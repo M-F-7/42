@@ -1,20 +1,21 @@
-FROM node:18-alpine
+### STAGE 1: Build ###
 
-RUN apk add --no-cache curl
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
-
-RUN npm install --omit=dev && npm cache clean --force
 COPY . .
 
-RUN addgroup -g 10080 -S gatewaygroup && \
-    adduser -S gatewayuser -u 10080 -G gatewaygroup
+RUN npm install && npm run build
 
-RUN chown -R gatewayuser:gatewaygroup /app
-USER gatewayuser
+### STAGE 2: Production ###
+FROM node:18-alpine AS production
 
-EXPOSE 8080
+WORKDIR /app
 
-CMD ["node", "index.js"]
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
+
+CMD ["node", "dist/index.js"]
+

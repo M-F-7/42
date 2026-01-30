@@ -3,9 +3,7 @@ include:
   - ./infrastructure/elk/docker-compose.yml
   - ./infrastructure/monitoring/docker-compose.yml
   - ./backend/docker-compose.yml
-  # - ./frontend/docker-compose.yml
+  - ./frontend/docker-compose.yml
 
-# networks:
-#   app-net:
-#     driver: bridge
-#     external: false
+networks:
+  app-net:

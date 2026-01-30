@@ -1,0 +1,87 @@
+groups:
+  - name: SystemAlerts
+    rules:
+      - alert: HostHighCPUUsage
+        expr: (1 - avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m]))) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on host"
+          description: "CPU > 80% for more than 5m"
+
+      - alert: HostHighMemory
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage above 85%"
+
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/", fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{mountpoint="/", fstype!~"tmpfs|overlay"}) * 100 < 10
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space remaining below 10%"
+
+  - name: DockerAlerts
+    rules:
+      - alert: CadvisorDown
+        expr: up{job="cadvisor"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "cAdvisor is down"
+          description: "Prometheus cannot scrape cAdvisor"
+
+      - alert: ContainerDown
+        expr: absent(container_last_seen{job="cadvisor"})
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container missing"
+          description: "A container metric is not present; it may be stopped or unreachable. Verify metric name/container labels."
+
+      - alert: ContainerHighMemoryPercent
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes * 100 > 90
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container memory > 90% of limit"
+          description: "Container memory usage exceeds 90% of configured limit"
+
+      - alert: ContainerHighCPU
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.9
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High container CPU usage"
+          description: "Container CPU usage high; adjust logic if multi-core host (normalize by cores if possible)."
+
+  - name: PrometheusAlerts
+    rules:
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus target down"
+          description: "One or more scrape targets are down"
+  - name: db
+    rules:
+      - alert: DatabaseDown
+        expr: db_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          description: "DB unreachable"

@@ -3,7 +3,7 @@ services:
     build: ./prometheus
     container_name: prometheus
     ports:
-      - "${PROMETHEUS_PORT:-4015}:9090"
+      - "${PROMETHEUS_PORT:-9090}:9090"
     env_file:
       - ../../.env
     environment:
@@ -27,18 +27,25 @@ services:
     build: ./grafana
     container_name: grafana
     ports:
-      - "${GRAFANA_PORT:-4014}:3000"
+      - "${GRAFANA_PORT:-3000}:3000"
     env_file:
       - ../../.env
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin_secure_2024}
-      - GF_SECURITY_SECRET_KEY=${GRAFANA_SECRET_KEY:-grafana_secret_key_2024}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SECURITY_SECRET_KEY=${GRAFANA_SECRET_KEY}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
       - GF_ANALYTICS_REPORTING_ENABLED=false
       - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_SERVER_CERT_FILE=/etc/grafana/certs/server.crt
+      - GF_SERVER_CERT_KEY=/etc/grafana/certs/server.key
     volumes:
+      - ./grafana/config/grafana.ini:/etc/grafana/grafana.ini
       - grafana_data:/var/lib/grafana
       - grafana_logs:/var/log/grafana
+      - ./grafana/config/dashboards:/var/lib/grafana/dashboards:ro
+      - ../../ssl/certs/:/etc/grafana/certs:ro
     networks:
       - app-net
     depends_on:
@@ -58,6 +65,35 @@ services:
       - app-net
     restart: unless-stopped
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+    networks:
+      - app-net
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./prometheus/config/alerts.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - app-net
+    restart: unless-stopped
+
 volumes:
   prometheus_data:
   prometheus_config:
@@ -66,4 +102,3 @@ volumes:
 
 networks:
   app-net:
-    external: true

@@ -1,0 +1,34 @@
+metricbeat.modules:
+  - module: system
+    metricsets:
+      - cpu
+      - memory
+      - network
+      - process
+      - process_summary
+      - socket
+      - core
+      - diskio
+      - filesystem
+    enabled: true
+    period: 10s
+    filesystem.ignore_types: ["autofs", "tmpfs", "overlay", "squashfs"]
+
+setup.kibana:
+  host: "https://kibana:5601"
+  username: "elastic"
+  password: "${ELASTIC_PASSWORD}"
+  ssl.verification_mode: "none"
+
+output.elasticsearch:
+  hosts: ["https://elasticsearch:9200"]
+  username: "elastic"
+  password: "${ELASTIC_PASSWORD}"
+  ssl.verification_mode: none
+  ssl.certificate_authorities: ["/usr/share/metricbeat/certs/server.crt"]
+
+
+setup.ilm.enabled: true
+setup.ilm.policy_name: "metricbeat_policy"
+setup.ilm.rollover_alias: "metricbeat"
+setup.ilm.check_exists: true

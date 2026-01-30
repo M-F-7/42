@@ -5,16 +5,19 @@ RUN apk add --no-cache curl
 WORKDIR /app
 
 COPY package*.json ./
+RUN npm install && npm cache clean --force
 
-RUN npm install --omit=dev && npm cache clean --force
+COPY tsconfig.json ./
 COPY . .
 
-RUN addgroup -g 10000 -S authgroup && \
-    adduser -S authuser -u 10000 -G authgroup
+RUN npm run build
 
-RUN chown -R authuser:authgroup /app
-USER authuser
+RUN mkdir -p /app/data && \
+    addgroup -g 10007 -S databasegroup && \
+    adduser -S databaseuser -u 10007 -G databasegroup && \
+    chown -R databaseuser:databasegroup /app
+USER databaseuser
 
 EXPOSE 4000
 
-CMD ["node", "index.js"]
+CMD ["node", "dist/index.js"]
