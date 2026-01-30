@@ -1,0 +1,6 @@
+fix les finds et les slices des corners pour pouvoir seulement placer un point sur un corners
+
+faire en sorte que le draw de la stone soit coherent 
+
+
+L IA joue, on passe son turn a false et tant que le player na pas mis une stone sont turn ne bouge pas et reprend et reread tout le board etc 
